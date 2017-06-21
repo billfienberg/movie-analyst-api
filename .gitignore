@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/movieanalyst-admin/node_modules
+/movieanalyst-website/node_modules
 
 # testing
 /coverage

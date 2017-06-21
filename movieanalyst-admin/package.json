@@ -1,5 +1,5 @@
 {
-  "name": "movie-analyst-api",
+  "name": "movieanalyst-website",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,10 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "auth0-api-jwt-rsa-validation": "0.0.1",
-    "dotenv": "^4.0.0",
+    "ejs": "^2.5.6",
     "express": "^4.15.3",
-    "express-jwt": "^5.3.0",
-    "jwks-rsa": "^1.1.1"
+    "superagent": "^3.5.2"
   }
 }

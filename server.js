@@ -1,12 +1,77 @@
-// Get our dependencies
 var express = require('express');
 var app = express();
 var jwt = require('express-jwt');
 var rsaValidation = require('auth0-api-jwt-rsa-validation');
+var dotenv = require('dotenv');
+dotenv.load();
 
-// Implement the movies API endpoint
+console.log(rsaValidation());
+var jwtCheck = jwt({
+	secret: rsaValidation(),
+	algorithms: ['RS256'],
+	audience: 'http://movieanalyst.com',
+	issuer: process.env.ISSUER,
+});
+
+var guard = function(req, res, next) {
+	console.log(req.user);
+	switch (req.path) {
+		case '/movies': {
+			var permissions = ['general'];
+			for (var i = 0; i < permissions.length; i++) {
+				if (req.user.scope.includes(permissions[i])) {
+					next();
+				} else {
+					res.status(403).send({ message: 'Forbidden' });
+				}
+			}
+			break;
+		}
+		case '/reviewers': {
+			var permissions = ['general'];
+			for (var i = 0; i < permissions.length; i++) {
+				if (req.user.scope.includes(permissions[i])) {
+					next();
+				} else {
+					res.send(403, { message: 'Forbidden' });
+				}
+			}
+			break;
+		}
+		case '/publications': {
+			var permissions = ['general'];
+			for (var i = 0; i < permissions.length; i++) {
+				if (req.user.scope.includes(permissions[i])) {
+					next();
+				} else {
+					res.send(403, { message: 'Forbidden' });
+				}
+			}
+			break;
+		}
+		case '/pending': {
+			var permissions = ['admin'];
+			for (var i = 0; i < permissions.length; i++) {
+				if (req.user.scope.includes(permissions[i])) {
+					next();
+				} else {
+					res.send(403, { message: 'Forbidden' });
+				}
+			}
+			break;
+		}
+	}
+};
+app.use(jwtCheck);
+app.use(function(err, req, res, next) {
+	if (err.name === 'UnauthorizedError') {
+		res.status(401).json({ message: 'Missing or invalid token' });
+	}
+});
+app.use(guard);
+
 app.get('/movies', function(req, res) {
-	const movies = [
+	var movies = [
 		{
 			title: 'Suicide Squad',
 			release: '2016',
@@ -58,14 +123,11 @@ app.get('/movies', function(req, res) {
 		},
 	];
 
-	// Send the response as a JSON array
 	res.json(movies);
 });
 
-// Implement the reviewers API endpoint
 app.get('/reviewers', function(req, res) {
-	// Get a list of all of our reviewers
-	const authors = [
+	var authors = [
 		{
 			name: 'Robert Smith',
 			publication: 'The Daily Reviewer',
@@ -105,14 +167,11 @@ app.get('/reviewers', function(req, res) {
 		},
 	];
 
-	// Send the list of reviewers as a JSON array
 	res.json(authors);
 });
 
-// Implement the publications API endpoint
 app.get('/publications', function(req, res) {
-	// Get a list of publications
-	const publications = [
+	var publications = [
 		{ name: 'The Daily Reviewer', avatar: 'glyphicon-eye-open' },
 		{ name: 'International Movie Critic', avatar: 'glyphicon-fire' },
 		{ name: 'MoviesNow', avatar: 'glyphicon-time' },
@@ -122,14 +181,11 @@ app.get('/publications', function(req, res) {
 		{ name: 'ComicBookHero.com', avatar: 'glyphicon-flash' },
 	];
 
-	// Send the list of publications as a JSON array
 	res.json(publications);
 });
 
-// Implement the pending reviews API endpoint
 app.get('/pending', function(req, res) {
-	// Get a list of pending movie reviewers
-	const pending = [
+	var pending = [
 		{
 			title: 'Superman: Homecoming',
 			release: '2017',
@@ -152,10 +208,7 @@ app.get('/pending', function(req, res) {
 			publication: 'ComicBookHero.com',
 		},
 	];
-
-	// Send the list of pending movie reviewas as a JSON array
-	res.send(pending);
+	res.json(pending);
 });
 
-// Launch out API Server and have it listen on port 8080
 app.listen(8080);
